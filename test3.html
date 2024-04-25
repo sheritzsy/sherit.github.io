@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+ 
+<head>
+  <meta charset="utf-8">
+  <title>文件上传和下载</title>
+ 
+  <style>
+    #fileList a {
+      background-color: white;
+      padding: 1px;
+    }
+    
+    .viewButton {
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 4px 2px;
+      cursor: pointer;
+    }
+  </style>
+ 
+</head>
+ 
+<body background="/images/芙莉莲.jpg" style="background-size:100%;background-attachment: fixed;">
+ 
+  <h1 style="color:white;">上传文件</h1>
+  
+  <input type="file" id="fileUpload">
+  <button onclick="uploadFile()">上传</button>
+  <span id="progress"></span>
+  
+    <br>
+    <a href="/showimage.php">
+        <button>只想要看图片？</button>
+    </a>
+  
+  <h1 style="color:white;">下载文件</h1>
+  
+  <div id="fileList"></div>
+ 
+  <script>
+    function uploadFile() {
+      // 上传文件JS代码
+        var fileInput = document.getElementById('fileUpload');
+        var file = fileInput.files[0];
+ 
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload.php');
+ 
+        xhr.upload.onprogress = function(event) {
+            var percent = Math.round(event.loaded / event.total * 100);
+            document.getElementById('progress').textContent = percent + '%';
+        };
+ 
+        var formData = new FormData();
+        formData.append('file', file);
+ 
+        xhr.send(formData);
+ 
+        xhr.onload = function() {
+            document.getElementById('progress').textContent = '上传完成';
+        };
+    }
+    
+    function listFiles() {
+      // 列出文件JS代码 
+        fetch('/list_files.php')
+        .then(response => response.json())
+        .then(data => {
+            var fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+            data.forEach(function(file) {
+                var link = document.createElement('a');
+                link.href = '/images/' + file;
+                link.download = file;
+            link.innerHTML = file;
+                fileList.appendChild(link);
+                if (file.endsWith('.mp4') || file.endsWith('.mp3')) {
+                    var viewButton = document.createElement('button');
+                    viewButton.innerHTML = '查看';
+                    viewButton.className = 'viewButton';
+                    viewButton.onclick = function() {
+                        window.open('/images/' + file);
+                    };
+                    fileList.appendChild(viewButton);
+                }
+                fileList.appendChild(document.createElement('br'));
+            });
+        })
+        .catch(error => console.error(error));
+    }
+ 
+    listFiles();
+  </script>
+ 
+</body>
+ 
+</html>

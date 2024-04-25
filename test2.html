@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>文件下载和预览测试</title>
+    <link href="styles/style.css" rel="stylesheet"/>
+    <style>
+        body{
+            width: 800px;
+            margin: 0 auto;/*外边框*/
+            background-color: #f5f0e9;
+            padding: 0 20px 20px 20px;/*内边框*/
+            border: 5px solid black;/*边框*/
+        }
+        #videoPlayer{
+            width: 600px;
+        }
+    </style>
+      <!--添加文字背景-->
+      <style>
+        #fileList a {
+            background-color: white;
+            padding: 1px;
+        }
+    </style>
+</head>
+<body>
+    <!--？背景打开有误-->
+    <body background="/images/4k.jpg" style="background-size:100%;background-attachment: fixed;" >
+    <h1>上传文件</h1>
+    <input type="file" id="fileUpload" accept=".pdf, .doc, .docx, .txt, .md, .html, .zip, .rar, .mp4, .mp3, .jpg, .jpeg, .png">
+    <button onclick="uploadFile()">上传</button>
+    <span id="progress"></span>
+  
+    <br>
+    <a href="/showimage.php">
+        <button>只想要看图片？</button>
+    </a>
+    <h1>下载文件</h1>
+    <div id="fileList"></div>
+    <a href="/images/示例图片.jpg" download="示例图片.jpg">资源</a><br><br>
+    
+    <script>
+        function uploadFile() {
+             // 上传文件JS代码
+            var fileInput = document.getElementById('fileUpload');
+            var file = fileInput.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+            fetch('/upload.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
+        }
+
+        function listFiles() {
+            fetch('/list_files.php')
+            .then(response => response.json())
+            .then(data => {
+                var fileList = document.getElementById('fileList');
+                fileList.innerHTML = '';
+                data.forEach(function(file) {
+                    var link = document.createElement('a');
+                    link.href = '/images/' + file;
+                    link.download = file;
+                    link.innerHTML = file;
+                    fileList.appendChild(link);
+                    fileList.appendChild(document.createElement('br'));
+                });
+            })
+            .catch(error => console.error(error));
+        }
+ 
+        listFiles();
+
+    </script>
+
+    <a href="index.html">返回</a>
+       
+    
+   
+        <h2>视频</h2>
+       <div id="videoPlayer"></div>
+    
+       <h2>[文档]()</h2>
+       <div id="documentViewer"></div>
+ 
+       <script>
+           // 视频播放器
+           function playVideo(videoUrl) {
+               var videoPlayer = document.getElementById("videoPlayer");
+               videoPlayer.innerHTML = "<video width='640' height='480' controls><source src='" + videoUrl + "' type='video/mp4'></video>";
+           }
+    
+           // [文档](https://geek.csdn.net/edu/300981ef51993cfd737d329c71ba77f9?dp_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6NDQ0MDg2MiwiZXhwIjoxNzA3MzcxOTM4LCJpYXQiOjE3MDY3NjcxMzgsInVzZXJuYW1lIjoid2VpeGluXzY4NjQ1NjQ1In0.RrTYEnMNYPC7AQdoij4SBb0kKEgHoyvF-bZOG2eGQvc&amp;spm=1055.2569.3001.10083)查看器
+           function viewDocument(documentUrl) {
+               var documentViewer = document.getElementById("documentViewer");
+               documentViewer.innerHTML = "<iframe src='" + documentUrl + "' width='800' height='600'></iframe>";
+           }
+    
+           // 示例数据
+           var videoUrl = "https://example.com/video.mp4";
+           var documentUrl = "https://example.com/document.pdf";
+    
+           // 初始化页面
+           playVideo(videoUrl);
+           viewDocument(documentUrl);
+       </script>
+   
+</body>
+</html>
